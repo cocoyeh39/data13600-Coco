@@ -42,7 +42,7 @@ def sum_view(request):
     total = n1+n2
     if total.is_integer():
         total = int(total)
-    return HttpResponse(f"<p>sum: {total}</p>")
+    return HttpResponse(f"<p>{total}</p>")
 
 def index(request):
     """Render the home page (index.html)."""
