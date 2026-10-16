@@ -27,12 +27,28 @@ CDT = zoneinfo.ZoneInfo("America/Chicago")
 # HW2  — index, time, sum
 # ---------------------------------------------------------------------------
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+
+def time_view(request):
+    now = datetime.now(ZoneInfo("America/Chicago"))
+    return HttpResponse(now.strftime("%H:%M"), content_type = "text/plain")
+
+def sum_view(request):
+    n1 = float(request.GET.get("n1",0))
+    n2 = float(request.GET.get("n2",0))
+    total = n1+n2
+    if total.is_integer():
+        total = int(total)
+    return JsonResponse({"sum": total})
+
 def index(request):
     """Render the home page (index.html)."""
 
     context = {}
     return render(request, 'app/index.html', context)
-
 
 
 # ---------------------------------------------------------------------------
