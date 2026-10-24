@@ -1,0 +1,7 @@
+I used ChatGPT for this comparison. I think the biggest difference is probably the structure of the ER diagram (which I did ask it to draw) as well. Interestingly, because I did not
+explicitly tell it to split users into Instructors and Students, it did not do that. I found that really interesting because it made the model so much more complicated and the flow of
+information between the different tables look tangled and messy. For some reason, it also made every relationship between the tables one to many, most likely due to it removing the 
+students and instructors tables. It did identify enrollment as a junction table, though it's use of "id" as the primary key seems odd. It also made the course table have a composite 
+primary key which I find weird as I don't see why name would need to be a primary key. A similar problem occured, where instructorID and studentID seem out of place and hard to distinguish
+and implement. So far, most of these problems seem to have come from the lack of separation between instructors and students. ChatGPT did make the models.py more complicated though, 
+by adding in a lot of helper functions, which could recall information.
