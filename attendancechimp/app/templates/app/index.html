@@ -12,9 +12,29 @@
 <body>
 <div class="bio">
     <h1>AttendanceChimp</h1>
-    <p>Electronic class attendance tracking application.</p>
-    <hr>
+    <p>Class attendance tracking application.</p>
+    <p>Students check in by uploading a photo of a QR code, Instructors get attendance records automatically</p> 
+   <hr>
 
 </div>
+
+<body style="text-align: center;">
+    <p>
+        {% if user_name %}
+           <strong>User: {{ user_name }}<strong>
+        {% else %}
+            <strong>User: Not logged in.<strong>
+        {% endif %}
+    </p>
+
+    <p>Current time (CST): {{ current_time }}</p>
+
+{% if user_name %}
+<form method="post" action="/accounts/logout/">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+</form>
+{% endif %}
+
 </body>
 </html>
