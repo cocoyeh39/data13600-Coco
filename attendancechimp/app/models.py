@@ -65,12 +65,14 @@ class Course(models.Model):
     Autogenerates an ID for courseID.
     """
 
-    courseID = models.AutoField(primary_key = True)
-    coursename = models.CharField(max_length=255)
+    courseID = models.AutoField(primary_key =True)
+    coursename = models.CharField(max_length=255, unique=True)
     instructorID = models.ForeignKey(InstructorProfile, on_delete=models.PROTECT)
     meetingDays = models.CharField(max_length=50)
-    startDate = models.DateField()
-    endDate =  models.DateField()
+    startTime = models.TimeField()
+    endTime = models.TimeField()
+    startDate = models.DateField(null=True, blank=True)
+    endDate =  models.DateField(null=True, blank=True)
 
 # ---------------------------------------------------------------------------
 # Enrollment
@@ -98,15 +100,15 @@ class Lecture(models.Model):
 # ---------------------------------------------------------------------------
 # QR Code Upload
 # ---------------------------------------------------------------------------
-class QRcodeUpload(models.Model):
+class QRCodeUpload(models.Model):
     """
-    Stores the QR codes uploaded by the student. lectureID is an optional input
+    Stores the QR codes uploaded by the student. QRidentifier is an optional input
     and can remain null.
     """
 
-    QRidentifier = models.ForeignKey(Lecture, on_delete=models.CASCADE)
+    QRidentifier = models.ForeignKey(Lecture, on_delete=models.SET_NULL, null=True, blank=True)
     studentID = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
-    QRcodeImage = models.ImageField(upload_to = 'qr_uploads/')
+    QRcodeImage = models.FileField(upload_to = 'qr_uploads/')
     submissionID = models.AutoField(primary_key=True)
     time = models.DateTimeField(auto_now_add=True)
 
