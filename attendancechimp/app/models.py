@@ -18,6 +18,8 @@ Entities
 
 from django.db import models
 from django.contrib.auth.models import User
+from zoneinfo import ZoneInfo
+from django.utils import timezone
 
 import logging
 import string
@@ -68,7 +70,11 @@ class Course(models.Model):
     courseID = models.AutoField(primary_key =True)
     coursename = models.CharField(max_length=255, unique=True)
     instructorID = models.ForeignKey(InstructorProfile, on_delete=models.PROTECT)
-    meetingDays = models.CharField(max_length=50)
+    mon = models.BooleanField(default=False)
+    tues = models.BooleanField(default=False)
+    wed = models.BooleanField(default=False)
+    thurs = models.BooleanField(default=False)
+    fri = models.BooleanField(default=False)
     startTime = models.TimeField()
     endTime = models.TimeField()
     startDate = models.DateField(null=True, blank=True)
@@ -115,6 +121,35 @@ class QRCodeUpload(models.Model):
 # ---------------------------------------------------------------------------
 # Helper / API functions
 # ---------------------------------------------------------------------------
+def is_instructor(user):
+    """ Returns true is user is an instructor"""
+    return (user.is_authenticated and InstructorProfile.objects.filter(userID=user).exists())
 
+def is_student(user):
+    """ Returns true is user is a student"""
+    return (user.is_authenticated and StudentProfile.objects.filter(userID=user).exists())
 
+def getUploadsForCourse(course):
+    """
+    Returns a list with valid QRCodeUploads or empty list if course doesn't exist
+    input course is the unique Course.coursename
+    """
+    course_obj = Course.objects.filter(coursename=course).first()
+    if course_obj is None:
+        return []
+
+    meets = [course_obj.mon, course_obj.tues, course_obj.wed,
+             course_obj.thurs, course_obj.fri]
+
+    valid = []
+    uploads = QRCodeUpload.objects.filter(QRidentifier__courseID=course_obj)
+    for upload in uploads:
+        stamp = upload.time
+        if timezone.is_aware(stamp):
+            stamp = stamp.astimezone(CDT)
+        day = stamp.weekday()  # 0 = Monday ... 6 = Sunday
+        if (day < 5 and meets[day]
+                and course_obj.startTime <= stamp.time() <= course_obj.endTime):
+            valid.append(upload)
+    return valid    
 

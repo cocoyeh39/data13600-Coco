@@ -17,7 +17,9 @@ from zoneinfo import ZoneInfo
 import json
 import io
 
-from .models import (InstructorProfile, StudentProfile, Course, Lecture, QRCodeUpload)
+from .models import (InstructorProfile, StudentProfile, Course, Lecture,
+                     QRCodeUpload, is_instructor, is_student,
+                     getUploadsForCourse)
 import secrets
 from django.utils.dateparse import parse_time
 
@@ -104,21 +106,8 @@ def createUser(request):
 # HW5  — courses, lectures, QR uploads, dump
 # ---------------------------------------------------------------------------
 
-DAY_FIELDS = [('day-mon', 'Mon'), ('day-tue', 'Tue'), ('day-wed', 'Wed'),
-              ('day-thu', 'Thu'), ('day-fri', 'Fri')]
-
-
-def is_instructor(user):
-    """Return True if `user` is logged in and has an InstructorProfile."""
-    return (user.is_authenticated
-            and InstructorProfile.objects.filter(userID=user).exists())
-
-
-def is_student(user):
-    """Return True if `user` is logged in and has a StudentProfile."""
-    return (user.is_authenticated
-            and StudentProfile.objects.filter(userID=user).exists())
-
+DAY_FIELDS = [('day-mon', 'mon'), ('day-tue', 'tues'), ('day-wed', 'wed'),
+              ('day-thu', 'thurs'), ('day-fri', 'fri')]
 
 def unauthorized():
     """Return the standard HTTP 401 response."""
@@ -138,13 +127,11 @@ def new_course(request):
     """Display the course-creation form (new_course.html)."""
     return render(request, 'app/new_course.html')
 
-
 @require_GET
 def new_lecture(request):
     """Display the lecture form with a dropdown of existing courses."""
     return render(request, 'app/new_lecture.html',
                   {'courses': Course.objects.all()})
-
 
 @require_GET
 def new_qr_upload(request):
@@ -246,6 +233,27 @@ def dumpUploads(request):
 # ---------------------------------------------------------------------------
 # HW6  — getUploads
 # ---------------------------------------------------------------------------
+
+@require_GET
+def getUploads(request):
+    """
+    Return the valid uploads for one course as JSON (GET, instructors only).
+
+    Reads `course` parameter
+    Returns 401 unless the user is an instructor, and 400 with an
+    error message if course doent exist. Calls getUploadsForCourse
+    """
+    if not is_instructor(request.user):
+        return unauthorized()
+
+    course = request.GET.get('course', '').strip()
+    if not course:
+        return JsonResponse({"error": "Missing course parameter"}, status=400)
+
+    data = [{'username': u.studentID.userID.username,
+             'upload_time': u.time.strftime('%Y-%m-%d %H:%M:%S')}
+            for u in getUploadsForCourse(course)]
+    return JsonResponse(data, safe=False)
 
 
 
