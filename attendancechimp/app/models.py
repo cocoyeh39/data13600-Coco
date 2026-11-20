@@ -25,6 +25,8 @@ import logging
 import string
 import random
 
+CDT = ZoneInfo("America/Chicago")
+
 logger = logging.getLogger(__name__) # set up tracking, auditing, and debugging
                                                                # allows using logger.warning(), logger.error(), 
                                                                # logger.info(), etc. Better than print() for debuggin... 
