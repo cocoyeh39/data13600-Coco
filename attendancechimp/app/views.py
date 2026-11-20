@@ -158,12 +158,12 @@ def createCourse(request):
     if not name or start is None or end is None:
         return HttpResponseBadRequest('Need course-name, start-time, end-time')
 
-    days = [label for key, label in DAY_FIELDS if key in request.POST]
     instructor = InstructorProfile.objects.get(userID=request.user)
+    day_flags = {field: (key in request.POST) for key, field in DAY_FIELDS}
     course, created = Course.objects.get_or_create(
         coursename=name,
-        defaults={'instructorID': instructor, 'meetingDays': ','.join(days),
-                  'startTime': start, 'endTime': end})
+        defaults={'instructorID': instructor, 'startTime': start,
+                  'endTime': end, **day_flags})
     return JsonResponse({'course': course.coursename, 'created': created})
 
 
